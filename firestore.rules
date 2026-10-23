@@ -1,0 +1,362 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Pillar 1: Global Default-Deny Catch-All
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Global Hardened Helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidTimestampsOnCreate(data) {
+      return data.createdAt is timestamp &&
+             data.createdAt <= request.time &&
+             data.updatedAt is timestamp &&
+             data.updatedAt <= request.time;
+    }
+
+    function isValidTimestampsOnUpdate(data, oldData) {
+      return data.createdAt == oldData.createdAt &&
+             data.updatedAt is timestamp &&
+             data.updatedAt <= request.time;
+    }
+
+    // 1. UserProfile Validation
+    function isValidUserProfile(data) {
+      return data.userId is string && data.userId == request.auth.uid && data.userId.size() <= 128 &&
+             data.householdName is string && data.householdName.size() >= 1 && data.householdName.size() <= 100 &&
+             data.adultsCount is int && data.adultsCount >= 1 && data.adultsCount <= 20 &&
+             data.childrenCount is int && data.childrenCount >= 0 && data.childrenCount <= 20 &&
+             data.mealsPerDay is int && data.mealsPerDay >= 1 && data.mealsPerDay <= 6 &&
+             data.planningDays is int && data.planningDays >= 1 && data.planningDays <= 31 &&
+             data.weeklyBudgetCents is int && data.weeklyBudgetCents >= 0 && data.weeklyBudgetCents <= 100000000 &&
+             data.currencyCode is string && data.currencyCode.size() >= 2 && data.currencyCode.size() <= 8 &&
+             data.measurementSystem is string && data.measurementSystem in ['METRIC', 'IMPERIAL'] &&
+             data.subscriptionState is string && data.subscriptionState in ['FREE', 'ACTIVE', 'TRIALING', 'GRACE_PERIOD', 'EXPIRED', 'CANCELED'] &&
+             data.onboardingCompleted is bool &&
+             (!('displayName' in data) || (data.displayName is string && data.displayName.size() <= 100)) &&
+             (!('childAgeRanges' in data) || (data.childAgeRanges is string && data.childAgeRanges.size() <= 200)) &&
+             (!('monthlyBudgetCents' in data) || (data.monthlyBudgetCents is int && data.monthlyBudgetCents >= 0 && data.monthlyBudgetCents <= 500000000)) &&
+             (!('budgetCycle' in data) || (data.budgetCycle is string && data.budgetCycle in ['WEEKLY', 'MONTHLY'])) &&
+             (!('carryOverEnabled' in data) || data.carryOverEnabled is bool) &&
+             (!('dietaryRestrictions' in data) || (data.dietaryRestrictions is string && data.dietaryRestrictions.size() <= 500)) &&
+             (!('allergies' in data) || (data.allergies is string && data.allergies.size() <= 500)) &&
+             (!('dislikedIngredients' in data) || (data.dislikedIngredients is string && data.dislikedIngredients.size() <= 500)) &&
+             (!('favoriteCuisines' in data) || (data.favoriteCuisines is string && data.favoriteCuisines.size() <= 500)) &&
+             (!('cookingExperience' in data) || (data.cookingExperience is string && data.cookingExperience.size() <= 50)) &&
+             (!('maxCookingTimeMins' in data) || (data.maxCookingTimeMins is int && data.maxCookingTimeMins >= 5 && data.maxCookingTimeMins <= 300)) &&
+             (!('kitchenEquipment' in data) || (data.kitchenEquipment is string && data.kitchenEquipment.size() <= 500)) &&
+             (!('preferredStores' in data) || (data.preferredStores is string && data.preferredStores.size() <= 500)) &&
+             (!('aiGenerationsUsed' in data) || (data.aiGenerationsUsed is int && data.aiGenerationsUsed >= 0 && data.aiGenerationsUsed <= 100000)) &&
+             (!('notificationsEnabled' in data) || data.notificationsEnabled is bool);
+    }
+
+    // 2. HouseholdMember Validation
+    function isValidHouseholdMember(data) {
+      return data.userId is string && data.userId == request.auth.uid && data.userId.size() <= 128 &&
+             data.name is string && data.name.size() >= 1 && data.name.size() <= 80 &&
+             data.role is string && data.role in ['ADULT', 'PARTNER', 'CHILD'] &&
+             data.dietaryPreference is string && data.dietaryPreference.size() <= 200 &&
+             (data.servingMultiplier is int || data.servingMultiplier is float) &&
+             data.servingMultiplier > 0 && data.servingMultiplier <= 5 &&
+             (!('dislikedFoods' in data) || (data.dislikedFoods is string && data.dislikedFoods.size() <= 300)) &&
+             (!('allergies' in data) || (data.allergies is string && data.allergies.size() <= 300));
+    }
+
+    // 3. PlannedMeal Validation
+    function isValidPlannedMeal(data) {
+      return data.userId is string && data.userId == request.auth.uid && data.userId.size() <= 128 &&
+             data.planId is string && data.planId.size() >= 1 && data.planId.size() <= 128 &&
+             data.dayIndex is int && data.dayIndex >= 1 && data.dayIndex <= 31 &&
+             data.dayName is string && data.dayName.size() >= 1 && data.dayName.size() <= 40 &&
+             data.mealType is string && data.mealType in ['BREAKFAST', 'LUNCH', 'DINNER', 'SNACK'] &&
+             data.recipeName is string && data.recipeName.size() >= 1 && data.recipeName.size() <= 150 &&
+             data.prepTimeMins is int && data.prepTimeMins >= 0 && data.prepTimeMins <= 600 &&
+             data.cookTimeMins is int && data.cookTimeMins >= 0 && data.cookTimeMins <= 600 &&
+             data.servings is int && data.servings >= 1 && data.servings <= 50 &&
+             data.estimatedCostCents is int && data.estimatedCostCents >= 0 && data.estimatedCostCents <= 10000000 &&
+             data.costPerServingCents is int && data.costPerServingCents >= 0 && data.costPerServingCents <= 10000000 &&
+             data.ingredientsSummary is string && data.ingredientsSummary.size() >= 1 && data.ingredientsSummary.size() <= 2500 &&
+             data.instructions is string && data.instructions.size() >= 1 && data.instructions.size() <= 5000 &&
+             data.isCooked is bool &&
+             (!('caloriesPerServing' in data) || (data.caloriesPerServing is int && data.caloriesPerServing >= 0 && data.caloriesPerServing <= 10000)) &&
+             (!('proteinGrams' in data) || (data.proteinGrams is int && data.proteinGrams >= 0 && data.proteinGrams <= 1000)) &&
+             (!('carbsGrams' in data) || (data.carbsGrams is int && data.carbsGrams >= 0 && data.carbsGrams <= 1000)) &&
+             (!('fatGrams' in data) || (data.fatGrams is int && data.fatGrams >= 0 && data.fatGrams <= 1000)) &&
+             (!('familyModificationNote' in data) || (data.familyModificationNote is string && data.familyModificationNote.size() <= 500)) &&
+             (!('isSavedRecipe' in data) || data.isSavedRecipe is bool);
+    }
+
+    // 4. PantryItem Validation
+    function isValidPantryItem(data) {
+      return data.userId is string && data.userId == request.auth.uid && data.userId.size() <= 128 &&
+             data.name is string && data.name.size() >= 1 && data.name.size() <= 120 &&
+             (data.quantity is int || data.quantity is float) && data.quantity >= 0 && data.quantity <= 1000000 &&
+             data.unit is string && data.unit.size() >= 1 && data.unit.size() <= 30 &&
+             data.category is string && data.category.size() >= 1 && data.category.size() <= 60 &&
+             data.storageLocation is string && data.storageLocation in ['Refrigerator', 'Freezer', 'Cupboard', 'Other'] &&
+             (!('purchaseDate' in data) || (data.purchaseDate is string && data.purchaseDate.size() <= 40)) &&
+             (!('expiryDate' in data) || (data.expiryDate is string && data.expiryDate.size() <= 40)) &&
+             (!('purchasePriceCents' in data) || (data.purchasePriceCents is int && data.purchasePriceCents >= 0 && data.purchasePriceCents <= 10000000)) &&
+             (!('lowStockThreshold' in data) || ((data.lowStockThreshold is int || data.lowStockThreshold is float) && data.lowStockThreshold >= 0 && data.lowStockThreshold <= 100000));
+    }
+
+    // 5. GroceryItem Validation
+    function isValidGroceryItem(data) {
+      return data.userId is string && data.userId == request.auth.uid && data.userId.size() <= 128 &&
+             data.name is string && data.name.size() >= 1 && data.name.size() <= 120 &&
+             (data.requiredQuantity is int || data.requiredQuantity is float) && data.requiredQuantity >= 0 && data.requiredQuantity <= 1000000 &&
+             data.unit is string && data.unit.size() >= 1 && data.unit.size() <= 30 &&
+             data.category is string && data.category.size() >= 1 && data.category.size() <= 60 &&
+             data.estimatedPriceCents is int && data.estimatedPriceCents >= 0 && data.estimatedPriceCents <= 10000000 &&
+             data.isPurchased is bool &&
+             (!('actualPriceCents' in data) || (data.actualPriceCents is int && data.actualPriceCents >= 0 && data.actualPriceCents <= 10000000)) &&
+             (!('fromRecipeName' in data) || (data.fromRecipeName is string && data.fromRecipeName.size() <= 150)) &&
+             (!('isRecurring' in data) || data.isRecurring is bool);
+    }
+
+    // 6. PurchaseRecord Validation
+    function isValidPurchaseRecord(data) {
+      return data.userId is string && data.userId == request.auth.uid && data.userId.size() <= 128 &&
+             data.storeName is string && data.storeName.size() >= 1 && data.storeName.size() <= 120 &&
+             data.purchaseDate is string && data.purchaseDate.size() >= 1 && data.purchaseDate.size() <= 40 &&
+             data.category is string && data.category in ['Vegetables', 'Fruits', 'Meat and seafood', 'Dairy', 'Grains', 'Snacks', 'Beverages', 'Other'] &&
+             data.totalAmountCents is int && data.totalAmountCents >= 0 && data.totalAmountCents <= 100000000 &&
+             data.itemsSummary is string && data.itemsSummary.size() >= 1 && data.itemsSummary.size() <= 2000 &&
+             data.isFromReceipt is bool &&
+             (!('receiptHash' in data) || (data.receiptHash is string && data.receiptHash.size() <= 256));
+    }
+
+    // Match /users/{userId}
+    match /users/{userId} {
+      allow get: if isOwner(userId) && isValidId(userId);
+      allow list: if isOwner(userId) && existing().userId == request.auth.uid;
+
+      allow create: if isOwner(userId) &&
+                       isValidId(userId) &&
+                       incoming().keys().hasAll([
+                         'userId', 'householdName', 'adultsCount', 'childrenCount',
+                         'mealsPerDay', 'planningDays', 'weeklyBudgetCents', 'currencyCode',
+                         'measurementSystem', 'subscriptionState', 'onboardingCompleted',
+                         'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'displayName', 'householdName', 'adultsCount', 'childrenCount',
+                         'childAgeRanges', 'mealsPerDay', 'planningDays', 'weeklyBudgetCents',
+                         'monthlyBudgetCents', 'budgetCycle', 'carryOverEnabled', 'currencyCode',
+                         'measurementSystem', 'dietaryRestrictions', 'allergies',
+                         'dislikedIngredients', 'favoriteCuisines', 'cookingExperience',
+                         'maxCookingTimeMins', 'kitchenEquipment', 'preferredStores',
+                         'subscriptionState', 'aiGenerationsUsed', 'onboardingCompleted',
+                         'notificationsEnabled', 'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidTimestampsOnCreate(incoming()) &&
+                       isValidUserProfile(incoming());
+
+      allow update: if isSignedIn() &&
+                       isValidUserProfile(incoming()) &&
+                       isOwner(userId) &&
+                       isValidId(userId) &&
+                       incoming().userId == existing().userId &&
+                       isValidTimestampsOnUpdate(incoming(), existing()) &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'displayName', 'householdName', 'adultsCount', 'childrenCount',
+                         'childAgeRanges', 'mealsPerDay', 'planningDays', 'weeklyBudgetCents',
+                         'monthlyBudgetCents', 'budgetCycle', 'carryOverEnabled', 'currencyCode',
+                         'measurementSystem', 'dietaryRestrictions', 'allergies',
+                         'dislikedIngredients', 'favoriteCuisines', 'cookingExperience',
+                         'maxCookingTimeMins', 'kitchenEquipment', 'preferredStores',
+                         'subscriptionState', 'aiGenerationsUsed', 'onboardingCompleted',
+                         'notificationsEnabled', 'updatedAt'
+                       ]);
+
+      allow delete: if isOwner(userId) && isValidId(userId);
+
+      // Subcollection: Household Members
+      match /members/{memberId} {
+        allow get: if isOwner(userId) && isValidId(memberId);
+        allow list: if isOwner(userId) && existing().userId == request.auth.uid;
+
+        allow create: if isOwner(userId) &&
+                         isValidId(memberId) &&
+                         incoming().keys().hasAll(['userId', 'name', 'role', 'dietaryPreference', 'servingMultiplier', 'createdAt', 'updatedAt']) &&
+                         incoming().keys().hasOnly(['userId', 'name', 'role', 'dietaryPreference', 'dislikedFoods', 'servingMultiplier', 'allergies', 'createdAt', 'updatedAt']) &&
+                         isValidTimestampsOnCreate(incoming()) &&
+                         isValidHouseholdMember(incoming());
+
+        allow update: if isSignedIn() &&
+                         isValidHouseholdMember(incoming()) &&
+                         isOwner(userId) &&
+                         isValidId(memberId) &&
+                         incoming().userId == existing().userId &&
+                         isValidTimestampsOnUpdate(incoming(), existing()) &&
+                         incoming().diff(existing()).affectedKeys().hasOnly(['name', 'role', 'dietaryPreference', 'dislikedFoods', 'servingMultiplier', 'allergies', 'updatedAt']);
+
+        allow delete: if isOwner(userId) && isValidId(memberId);
+      }
+
+      // Subcollection: Planned Meals
+      match /planned_meals/{mealId} {
+        allow get: if isOwner(userId) && isValidId(mealId);
+        allow list: if isOwner(userId) && existing().userId == request.auth.uid;
+
+        allow create: if isOwner(userId) &&
+                         isValidId(mealId) &&
+                         incoming().keys().hasAll([
+                           'userId', 'planId', 'dayIndex', 'dayName', 'mealType',
+                           'recipeName', 'prepTimeMins', 'cookTimeMins', 'servings',
+                           'estimatedCostCents', 'costPerServingCents', 'ingredientsSummary',
+                           'instructions', 'isCooked', 'createdAt', 'updatedAt'
+                         ]) &&
+                         incoming().keys().hasOnly([
+                           'userId', 'planId', 'dayIndex', 'dayName', 'mealType',
+                           'recipeName', 'prepTimeMins', 'cookTimeMins', 'servings',
+                           'estimatedCostCents', 'costPerServingCents', 'ingredientsSummary',
+                           'instructions', 'caloriesPerServing', 'proteinGrams',
+                           'carbsGrams', 'fatGrams', 'isCooked', 'familyModificationNote',
+                           'isSavedRecipe', 'createdAt', 'updatedAt'
+                         ]) &&
+                         isValidTimestampsOnCreate(incoming()) &&
+                         isValidPlannedMeal(incoming());
+
+        allow update: if isSignedIn() &&
+                         isValidPlannedMeal(incoming()) &&
+                         isOwner(userId) &&
+                         isValidId(mealId) &&
+                         incoming().userId == existing().userId &&
+                         isValidTimestampsOnUpdate(incoming(), existing()) &&
+                         incoming().diff(existing()).affectedKeys().hasOnly([
+                           'planId', 'dayIndex', 'dayName', 'mealType', 'recipeName',
+                           'prepTimeMins', 'cookTimeMins', 'servings', 'estimatedCostCents',
+                           'costPerServingCents', 'ingredientsSummary', 'instructions',
+                           'caloriesPerServing', 'proteinGrams', 'carbsGrams', 'fatGrams',
+                           'isCooked', 'familyModificationNote', 'isSavedRecipe', 'updatedAt'
+                         ]);
+
+        allow delete: if isOwner(userId) && isValidId(mealId);
+      }
+
+      // Subcollection: Pantry Items
+      match /pantry_items/{itemId} {
+        allow get: if isOwner(userId) && isValidId(itemId);
+        allow list: if isOwner(userId) && existing().userId == request.auth.uid;
+
+        allow create: if isOwner(userId) &&
+                         isValidId(itemId) &&
+                         incoming().keys().hasAll([
+                           'userId', 'name', 'quantity', 'unit', 'category',
+                           'storageLocation', 'createdAt', 'updatedAt'
+                         ]) &&
+                         incoming().keys().hasOnly([
+                           'userId', 'name', 'quantity', 'unit', 'category',
+                           'purchaseDate', 'expiryDate', 'purchasePriceCents',
+                           'storageLocation', 'lowStockThreshold', 'createdAt', 'updatedAt'
+                         ]) &&
+                         isValidTimestampsOnCreate(incoming()) &&
+                         isValidPantryItem(incoming());
+
+        allow update: if isSignedIn() &&
+                         isValidPantryItem(incoming()) &&
+                         isOwner(userId) &&
+                         isValidId(itemId) &&
+                         incoming().userId == existing().userId &&
+                         isValidTimestampsOnUpdate(incoming(), existing()) &&
+                         incoming().diff(existing()).affectedKeys().hasOnly([
+                           'name', 'quantity', 'unit', 'category', 'purchaseDate',
+                           'expiryDate', 'purchasePriceCents', 'storageLocation',
+                           'lowStockThreshold', 'updatedAt'
+                         ]);
+
+        allow delete: if isOwner(userId) && isValidId(itemId);
+      }
+
+      // Subcollection: Grocery Items
+      match /grocery_items/{itemId} {
+        allow get: if isOwner(userId) && isValidId(itemId);
+        allow list: if isOwner(userId) && existing().userId == request.auth.uid;
+
+        allow create: if isOwner(userId) &&
+                         isValidId(itemId) &&
+                         incoming().keys().hasAll([
+                           'userId', 'name', 'requiredQuantity', 'unit', 'category',
+                           'estimatedPriceCents', 'isPurchased', 'createdAt', 'updatedAt'
+                         ]) &&
+                         incoming().keys().hasOnly([
+                           'userId', 'name', 'requiredQuantity', 'unit', 'category',
+                           'estimatedPriceCents', 'isPurchased', 'actualPriceCents',
+                           'fromRecipeName', 'isRecurring', 'createdAt', 'updatedAt'
+                         ]) &&
+                         isValidTimestampsOnCreate(incoming()) &&
+                         isValidGroceryItem(incoming());
+
+        allow update: if isSignedIn() &&
+                         isValidGroceryItem(incoming()) &&
+                         isOwner(userId) &&
+                         isValidId(itemId) &&
+                         incoming().userId == existing().userId &&
+                         isValidTimestampsOnUpdate(incoming(), existing()) &&
+                         incoming().diff(existing()).affectedKeys().hasOnly([
+                           'name', 'requiredQuantity', 'unit', 'category',
+                           'estimatedPriceCents', 'isPurchased', 'actualPriceCents',
+                           'fromRecipeName', 'isRecurring', 'updatedAt'
+                         ]);
+
+        allow delete: if isOwner(userId) && isValidId(itemId);
+      }
+
+      // Subcollection: Purchases
+      match /purchases/{purchaseId} {
+        allow get: if isOwner(userId) && isValidId(purchaseId);
+        allow list: if isOwner(userId) && existing().userId == request.auth.uid;
+
+        allow create: if isOwner(userId) &&
+                         isValidId(purchaseId) &&
+                         incoming().keys().hasAll([
+                           'userId', 'storeName', 'purchaseDate', 'category',
+                           'totalAmountCents', 'itemsSummary', 'isFromReceipt',
+                           'createdAt', 'updatedAt'
+                         ]) &&
+                         incoming().keys().hasOnly([
+                           'userId', 'storeName', 'purchaseDate', 'category',
+                           'totalAmountCents', 'itemsSummary', 'receiptHash',
+                           'isFromReceipt', 'createdAt', 'updatedAt'
+                         ]) &&
+                         isValidTimestampsOnCreate(incoming()) &&
+                         isValidPurchaseRecord(incoming());
+
+        allow update: if isSignedIn() &&
+                         isValidPurchaseRecord(incoming()) &&
+                         isOwner(userId) &&
+                         isValidId(purchaseId) &&
+                         incoming().userId == existing().userId &&
+                         isValidTimestampsOnUpdate(incoming(), existing()) &&
+                         incoming().diff(existing()).affectedKeys().hasOnly([
+                           'storeName', 'purchaseDate', 'category',
+                           'totalAmountCents', 'itemsSummary', 'receiptHash',
+                           'isFromReceipt', 'updatedAt'
+                         ]);
+
+        allow delete: if isOwner(userId) && isValidId(purchaseId);
+      }
+    }
+  }
+}

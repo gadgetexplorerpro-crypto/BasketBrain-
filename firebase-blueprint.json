@@ -1,0 +1,231 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User account, household configuration, budget preferences, dietary profile, and subscription entitlement.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Owner Firebase Auth UID" },
+        "displayName": { "type": "string", "description": "User display name" },
+        "householdName": { "type": "string", "description": "Household name" },
+        "adultsCount": { "type": "integer", "description": "Number of adults in household" },
+        "childrenCount": { "type": "integer", "description": "Number of children in household" },
+        "childAgeRanges": { "type": "string", "description": "Age ranges of children if any" },
+        "mealsPerDay": { "type": "integer", "description": "Number of meals planned per day" },
+        "planningDays": { "type": "integer", "description": "Number of days per meal plan cycle" },
+        "weeklyBudgetCents": { "type": "integer", "description": "Weekly grocery budget in minor currency units (cents)" },
+        "monthlyBudgetCents": { "type": "integer", "description": "Monthly grocery budget in minor currency units (cents)" },
+        "budgetCycle": { "type": "string", "description": "WEEKLY or MONTHLY" },
+        "carryOverEnabled": { "type": "boolean", "description": "Whether unused budget carries over" },
+        "currencyCode": { "type": "string", "description": "ISO currency code (USD, GBP, CAD, AUD, EUR, PKR)" },
+        "measurementSystem": { "type": "string", "description": "METRIC or IMPERIAL" },
+        "dietaryRestrictions": { "type": "string", "description": "Comma-separated dietary restrictions" },
+        "allergies": { "type": "string", "description": "Allergies and ingredients to strictly avoid" },
+        "dislikedIngredients": { "type": "string", "description": "Disliked ingredients" },
+        "favoriteCuisines": { "type": "string", "description": "Preferred cuisines" },
+        "cookingExperience": { "type": "string", "description": "BEGINNER, INTERMEDIATE, or ADVANCED" },
+        "maxCookingTimeMins": { "type": "integer", "description": "Maximum cooking time in minutes" },
+        "kitchenEquipment": { "type": "string", "description": "Available kitchen equipment" },
+        "preferredStores": { "type": "string", "description": "Preferred grocery stores" },
+        "subscriptionState": { "type": "string", "description": "FREE, ACTIVE, TRIALING, GRACE_PERIOD, EXPIRED, or CANCELED" },
+        "aiGenerationsUsed": { "type": "integer", "description": "Count of AI generations used in period" },
+        "onboardingCompleted": { "type": "boolean", "description": "Whether initial onboarding has been completed" },
+        "notificationsEnabled": { "type": "boolean", "description": "Whether reminders and alerts are enabled" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp of creation" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp of last update" }
+      },
+      "required": [
+        "userId",
+        "householdName",
+        "adultsCount",
+        "childrenCount",
+        "mealsPerDay",
+        "planningDays",
+        "weeklyBudgetCents",
+        "currencyCode",
+        "measurementSystem",
+        "subscriptionState",
+        "onboardingCompleted",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "HouseholdMember": {
+      "title": "HouseholdMember",
+      "description": "Individual member of a household with specific dietary needs, dislikes, allergies, and serving size.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Owner Firebase Auth UID" },
+        "name": { "type": "string", "description": "Member name" },
+        "role": { "type": "string", "description": "ADULT, PARTNER, or CHILD" },
+        "dietaryPreference": { "type": "string", "description": "Dietary preference e.g. High protein, Vegetarian, Mild" },
+        "dislikedFoods": { "type": "string", "description": "Disliked foods" },
+        "servingMultiplier": { "type": "number", "description": "Portion multiplier e.g. 1.0 or 0.5" },
+        "allergies": { "type": "string", "description": "Member specific allergies" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp" }
+      },
+      "required": ["userId", "name", "role", "dietaryPreference", "servingMultiplier", "createdAt", "updatedAt"]
+    },
+    "PlannedMeal": {
+      "title": "PlannedMeal",
+      "description": "A single planned meal within the user's weekly budget-first meal plan.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Owner Firebase Auth UID" },
+        "planId": { "type": "string", "description": "Meal plan identifier" },
+        "dayIndex": { "type": "integer", "description": "Day index 1..7" },
+        "dayName": { "type": "string", "description": "Day label" },
+        "mealType": { "type": "string", "description": "BREAKFAST, LUNCH, DINNER, or SNACK" },
+        "recipeName": { "type": "string", "description": "Name of the recipe" },
+        "prepTimeMins": { "type": "integer", "description": "Preparation time in minutes" },
+        "cookTimeMins": { "type": "integer", "description": "Total cooking time in minutes" },
+        "servings": { "type": "integer", "description": "Number of servings" },
+        "estimatedCostCents": { "type": "integer", "description": "Total estimated ingredient cost in cents" },
+        "costPerServingCents": { "type": "integer", "description": "Estimated cost per serving in cents" },
+        "ingredientsSummary": { "type": "string", "description": "Formatted ingredient quantities" },
+        "instructions": { "type": "string", "description": "Step-by-step cooking instructions" },
+        "caloriesPerServing": { "type": "integer", "description": "Estimated calories per serving" },
+        "proteinGrams": { "type": "integer", "description": "Estimated protein in grams" },
+        "carbsGrams": { "type": "integer", "description": "Estimated carbohydrates in grams" },
+        "fatGrams": { "type": "integer", "description": "Estimated fat in grams" },
+        "isCooked": { "type": "boolean", "description": "Whether this meal has been cooked" },
+        "familyModificationNote": { "type": "string", "description": "Shared base meal modification note for family members" },
+        "isSavedRecipe": { "type": "boolean", "description": "Whether saved to favorites" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp" }
+      },
+      "required": [
+        "userId",
+        "planId",
+        "dayIndex",
+        "dayName",
+        "mealType",
+        "recipeName",
+        "prepTimeMins",
+        "cookTimeMins",
+        "servings",
+        "estimatedCostCents",
+        "costPerServingCents",
+        "ingredientsSummary",
+        "instructions",
+        "isCooked",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "PantryItem": {
+      "title": "PantryItem",
+      "description": "Digital pantry and food inventory record.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Owner Firebase Auth UID" },
+        "name": { "type": "string", "description": "Ingredient name" },
+        "quantity": { "type": "number", "description": "Available quantity" },
+        "unit": { "type": "string", "description": "Measurement unit (g, kg, ml, L, pcs, oz, lb)" },
+        "category": { "type": "string", "description": "Grocery category" },
+        "purchaseDate": { "type": "string", "description": "ISO date of purchase" },
+        "expiryDate": { "type": "string", "description": "ISO best-before or expiry date" },
+        "purchasePriceCents": { "type": "integer", "description": "Optional purchase price in cents" },
+        "storageLocation": { "type": "string", "description": "Refrigerator, Freezer, Cupboard, or Other" },
+        "lowStockThreshold": { "type": "number", "description": "Threshold below which low-stock alert triggers" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp" }
+      },
+      "required": [
+        "userId",
+        "name",
+        "quantity",
+        "unit",
+        "category",
+        "storageLocation",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "GroceryItem": {
+      "title": "GroceryItem",
+      "description": "Smart consolidated grocery shopping list item.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Owner Firebase Auth UID" },
+        "name": { "type": "string", "description": "Ingredient name" },
+        "requiredQuantity": { "type": "number", "description": "Net quantity needed after subtracting pantry" },
+        "unit": { "type": "string", "description": "Measurement unit" },
+        "category": { "type": "string", "description": "Grocery store category" },
+        "estimatedPriceCents": { "type": "integer", "description": "User-editable estimated item cost in cents" },
+        "isPurchased": { "type": "boolean", "description": "Whether checked off in store" },
+        "actualPriceCents": { "type": "integer", "description": "Confirmed purchase price in cents" },
+        "fromRecipeName": { "type": "string", "description": "Source recipe or Custom" },
+        "isRecurring": { "type": "boolean", "description": "Whether part of recurring essentials list" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp" }
+      },
+      "required": [
+        "userId",
+        "name",
+        "requiredQuantity",
+        "unit",
+        "category",
+        "estimatedPriceCents",
+        "isPurchased",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "PurchaseRecord": {
+      "title": "PurchaseRecord",
+      "description": "Recorded grocery expense transaction or confirmed receipt scan.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Owner Firebase Auth UID" },
+        "storeName": { "type": "string", "description": "Grocery store name" },
+        "purchaseDate": { "type": "string", "description": "ISO date of purchase" },
+        "category": { "type": "string", "description": "Primary spending category" },
+        "totalAmountCents": { "type": "integer", "description": "Total spent in minor currency units (cents)" },
+        "itemsSummary": { "type": "string", "description": "Line items summary" },
+        "receiptHash": { "type": "string", "description": "Deduplication signature for scanned receipts" },
+        "isFromReceipt": { "type": "boolean", "description": "Whether created via receipt scanner" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp" }
+      },
+      "required": [
+        "userId",
+        "storeName",
+        "purchaseDate",
+        "category",
+        "totalAmountCents",
+        "itemsSummary",
+        "isFromReceipt",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "User profile, household setup, budget settings, and subscription state."
+    },
+    "/users/{userId}/members/{memberId}": {
+      "schema": { "$ref": "#/entities/HouseholdMember" },
+      "description": "Household members and their individual dietary preferences and allergies."
+    },
+    "/users/{userId}/planned_meals/{mealId}": {
+      "schema": { "$ref": "#/entities/PlannedMeal" },
+      "description": "Planned meals in the user's weekly meal plan."
+    },
+    "/users/{userId}/pantry_items/{itemId}": {
+      "schema": { "$ref": "#/entities/PantryItem" },
+      "description": "Digital pantry inventory items."
+    },
+    "/users/{userId}/grocery_items/{itemId}": {
+      "schema": { "$ref": "#/entities/GroceryItem" },
+      "description": "Consolidated smart grocery list items."
+    },
+    "/users/{userId}/purchases/{purchaseId}": {
+      "schema": { "$ref": "#/entities/PurchaseRecord" },
+      "description": "Recorded grocery purchases and verified receipt scans."
+    }
+  }
+}

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="320dp"
+    android:height="180dp"
+    android:viewportWidth="320"
+    android:viewportHeight="180">
+    <path android:pathData="M0,0h320v180h-320z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="0"
+                android:startY="0"
+                android:endX="320"
+                android:endY="180"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#174C3C" />
+                <item android:offset="1.0" android:color="#236B55" />
+            </gradient>
+        </aapt:attr>
+    </path>
+    <!-- Soft decorative circles -->
+    <path
+        android:fillColor="#1AA7C9A1"
+        android:pathData="M260,40m-70,0a70,70 0,1 1,140 0a70,70 0,1 1,-140 0" />
+    <path
+        android:fillColor="#22FFB547"
+        android:pathData="M60,150m-55,0a55,55 0,1 1,110 0a55,55 0,1 1,-110 0" />
+    <!-- Fresh produce & basket illustration -->
+    <path
+        android:fillColor="#A7C9A1"
+        android:pathData="M160,42 C178,42 192,56 192,74 C174,74 160,60 160,42 Z" />
+    <path
+        android:fillColor="#85B87E"
+        android:pathData="M156,48 C140,48 128,60 128,76 C144,76 156,64 156,48 Z" />
+    <!-- Citrus sun accent -->
+    <path
+        android:fillColor="#FFB547"
+        android:pathData="M198,66m-16,0a16,16 0,1 1,32 0a16,16 0,1 1,-32 0" />
+    <!-- Woven basket -->
+    <path
+        android:fillColor="#F8FAF6"
+        android:pathData="M106,78 h108 a6,6 0 0 1 6,6 v8 a6,6 0 0 1 -6,6 h-108 a6,6 0 0 1 -6,-6 v-8 a6,6 0 0 1 6,-6 z" />
+    <path
+        android:fillColor="#EBF2E8"
+        android:pathData="M114,102 h92 l-10,42 a10,10 0 0 1 -10,8 h-52 a10,10 0 0 1 -10,-8 z" />
+    <!-- Coin emblem -->
+    <path
+        android:fillColor="#FFB547"
+        android:pathData="M160,126m-14,0a14,14 0,1 1,28 0a14,14 0,1 1,-28 0" />
+</vector>

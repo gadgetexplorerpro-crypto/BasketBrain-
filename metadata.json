@@ -1,0 +1,6 @@
+{
+  "name": "BasketBrain",
+  "description": "Smart grocery budget and meal planner that helps households eat better, spend smarter, and waste less.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
