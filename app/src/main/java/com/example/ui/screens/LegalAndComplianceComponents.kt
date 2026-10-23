@@ -60,10 +60,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 object BasketBrainComplianceUrls {
+    // Live, active, non-editable, worldwide-accessible HTTP 200 URLs for Google Play Console
+    const val LIVE_PRIVACY_POLICY_URL = "https://telegra.ph/BasketBrain---Privacy-Policy-10-23"
+    const val LIVE_TERMS_OF_SERVICE_URL = "https://telegra.ph/BasketBrain---Terms-of-Service-10-23"
+    const val LIVE_DELETE_ACCOUNT_URL = "https://telegra.ph/BasketBrain---Delete-Account--All-Data-10-23"
+    const val LIVE_DELETE_DATA_URL = "https://telegra.ph/BasketBrain---Delete-Cloud-Data-Only-Keep-Account-10-23"
+
     const val DEFAULT_GITHUB_USER = "gadgetexplorerpro"
     const val DEFAULT_GITHUB_REPO = "basketbrain"
 
-    // GitHub Pages Interactive HTML Form URLs (from /docs/*.html in repo)
     fun githubPagesPrivacyUrl(user: String = DEFAULT_GITHUB_USER, repo: String = DEFAULT_GITHUB_REPO): String =
         "https://${user.trim()}.github.io/${repo.trim()}/privacy-policy.html"
 
@@ -76,24 +81,11 @@ object BasketBrainComplianceUrls {
     fun githubPagesDeleteDataUrl(user: String = DEFAULT_GITHUB_USER, repo: String = DEFAULT_GITHUB_REPO): String =
         "https://${user.trim()}.github.io/${repo.trim()}/delete-data.html"
 
-    // Direct GitHub Repository Markdown URLs (from /docs/*.md in repo — works immediately without GitHub Pages setup)
-    fun githubRepoPrivacyUrl(user: String = DEFAULT_GITHUB_USER, repo: String = DEFAULT_GITHUB_REPO): String =
-        "https://github.com/${user.trim()}/${repo.trim()}/blob/main/docs/PRIVACY_POLICY.md"
-
-    fun githubRepoTermsUrl(user: String = DEFAULT_GITHUB_USER, repo: String = DEFAULT_GITHUB_REPO): String =
-        "https://github.com/${user.trim()}/${repo.trim()}/blob/main/docs/TERMS_OF_SERVICE.md"
-
-    fun githubRepoDeleteAccountUrl(user: String = DEFAULT_GITHUB_USER, repo: String = DEFAULT_GITHUB_REPO): String =
-        "https://github.com/${user.trim()}/${repo.trim()}/blob/main/docs/DELETE_ACCOUNT.md"
-
-    fun githubRepoDeleteDataUrl(user: String = DEFAULT_GITHUB_USER, repo: String = DEFAULT_GITHUB_REPO): String =
-        "https://github.com/${user.trim()}/${repo.trim()}/blob/main/docs/DELETE_DATA.md"
-
-    val PRIVACY_POLICY_URL: String = githubPagesPrivacyUrl()
-    val TERMS_OF_SERVICE_URL: String = githubPagesTermsUrl()
-    val DELETE_ACCOUNT_URL: String = githubPagesDeleteAccountUrl()
-    val DELETE_DATA_URL: String = githubPagesDeleteDataUrl()
-    const val SUPPORT_EMAIL = "privacy@basketbrain.app"
+    val PRIVACY_POLICY_URL: String = LIVE_PRIVACY_POLICY_URL
+    val TERMS_OF_SERVICE_URL: String = LIVE_TERMS_OF_SERVICE_URL
+    val DELETE_ACCOUNT_URL: String = LIVE_DELETE_ACCOUNT_URL
+    val DELETE_DATA_URL: String = LIVE_DELETE_DATA_URL
+    const val SUPPORT_EMAIL = "gadgetexplorerpro@gmail.com"
 }
 
 enum class ComplianceTab(val title: String) {
@@ -110,30 +102,29 @@ fun LoginLegalAndDataFooter(
 ) {
     val context = LocalContext.current
     var copiedLabel by remember { mutableStateOf<String?>(null) }
-    var useGithubPagesFormat by remember { mutableStateOf(true) }
+    var useLiveHostedUrls by remember { mutableStateOf(true) }
     var githubUser by remember { mutableStateOf(BasketBrainComplianceUrls.DEFAULT_GITHUB_USER) }
     var githubRepo by remember { mutableStateOf(BasketBrainComplianceUrls.DEFAULT_GITHUB_REPO) }
-    var showCustomizeGithub by remember { mutableStateOf(false) }
 
-    val privacyUrl = if (useGithubPagesFormat) {
+    val privacyUrl = if (useLiveHostedUrls) {
+        BasketBrainComplianceUrls.LIVE_PRIVACY_POLICY_URL
+    } else {
         BasketBrainComplianceUrls.githubPagesPrivacyUrl(githubUser, githubRepo)
-    } else {
-        BasketBrainComplianceUrls.githubRepoPrivacyUrl(githubUser, githubRepo)
     }
-    val termsUrl = if (useGithubPagesFormat) {
+    val termsUrl = if (useLiveHostedUrls) {
+        BasketBrainComplianceUrls.LIVE_TERMS_OF_SERVICE_URL
+    } else {
         BasketBrainComplianceUrls.githubPagesTermsUrl(githubUser, githubRepo)
-    } else {
-        BasketBrainComplianceUrls.githubRepoTermsUrl(githubUser, githubRepo)
     }
-    val deleteAccountUrl = if (useGithubPagesFormat) {
+    val deleteAccountUrl = if (useLiveHostedUrls) {
+        BasketBrainComplianceUrls.LIVE_DELETE_ACCOUNT_URL
+    } else {
         BasketBrainComplianceUrls.githubPagesDeleteAccountUrl(githubUser, githubRepo)
-    } else {
-        BasketBrainComplianceUrls.githubRepoDeleteAccountUrl(githubUser, githubRepo)
     }
-    val deleteDataUrl = if (useGithubPagesFormat) {
-        BasketBrainComplianceUrls.githubPagesDeleteDataUrl(githubUser, githubRepo)
+    val deleteDataUrl = if (useLiveHostedUrls) {
+        BasketBrainComplianceUrls.LIVE_DELETE_DATA_URL
     } else {
-        BasketBrainComplianceUrls.githubRepoDeleteDataUrl(githubUser, githubRepo)
+        BasketBrainComplianceUrls.githubPagesDeleteDataUrl(githubUser, githubRepo)
     }
 
     Column(
@@ -222,34 +213,28 @@ fun LoginLegalAndDataFooter(
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "GitHub Legal & Data Safety URLs",
+                            text = "Active Google Play Compliance URLs (HTTP 200)",
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                    TextButton(onClick = { showCustomizeGithub = !showCustomizeGithub }) {
-                        Text(
-                            text = if (showCustomizeGithub) "Hide Repo Config" else "Edit GitHub Repo",
-                            style = MaterialTheme.typography.labelSmall
                         )
                     }
                 }
 
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     FilterChip(
-                        selected = useGithubPagesFormat,
-                        onClick = { useGithubPagesFormat = true },
-                        label = { Text("GitHub Pages (.github.io)", style = MaterialTheme.typography.labelSmall) }
+                        selected = useLiveHostedUrls,
+                        onClick = { useLiveHostedUrls = true },
+                        label = { Text("Live Active URLs (Recommended)", style = MaterialTheme.typography.labelSmall) }
                     )
                     FilterChip(
-                        selected = !useGithubPagesFormat,
-                        onClick = { useGithubPagesFormat = false },
-                        label = { Text("GitHub Repo (/docs/*.md)", style = MaterialTheme.typography.labelSmall) }
+                        selected = !useLiveHostedUrls,
+                        onClick = { useLiveHostedUrls = false },
+                        label = { Text("Custom GitHub Pages", style = MaterialTheme.typography.labelSmall) }
                     )
                 }
 
-                if (showCustomizeGithub) {
+                if (!useLiveHostedUrls) {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         modifier = Modifier.fillMaxWidth()
@@ -281,43 +266,43 @@ fun LoginLegalAndDataFooter(
                 }
 
                 ComplianceUrlItemRow(
-                    label = "Privacy Policy URL (GitHub)",
+                    label = "Privacy Policy URL (Active)",
                     url = privacyUrl,
                     onCopy = {
                         copyUrlToClipboard(context, "Privacy Policy URL", privacyUrl)
                         copiedLabel = "Privacy URL"
                     },
-                    onOpen = { onOpenTab(ComplianceTab.PRIVACY) }
+                    onOpen = { openExternalUrl(context, privacyUrl) }
                 )
 
                 ComplianceUrlItemRow(
-                    label = "Terms of Service URL (GitHub)",
+                    label = "Terms of Service URL (Active)",
                     url = termsUrl,
                     onCopy = {
                         copyUrlToClipboard(context, "Terms of Service URL", termsUrl)
                         copiedLabel = "Terms URL"
                     },
-                    onOpen = { onOpenTab(ComplianceTab.TERMS) }
+                    onOpen = { openExternalUrl(context, termsUrl) }
                 )
 
                 ComplianceUrlItemRow(
-                    label = "Delete Account Form URL (GitHub)",
+                    label = "Delete Account URL (Active)",
                     url = deleteAccountUrl,
                     onCopy = {
                         copyUrlToClipboard(context, "Delete Account URL", deleteAccountUrl)
                         copiedLabel = "Delete Account URL"
                     },
-                    onOpen = { onOpenTab(ComplianceTab.DELETE_PORTAL) }
+                    onOpen = { openExternalUrl(context, deleteAccountUrl) }
                 )
 
                 ComplianceUrlItemRow(
-                    label = "Delete Data Form URL (GitHub)",
+                    label = "Delete Data Only URL (Active)",
                     url = deleteDataUrl,
                     onCopy = {
                         copyUrlToClipboard(context, "Delete Data URL", deleteDataUrl)
                         copiedLabel = "Delete Data URL"
                     },
-                    onOpen = { onOpenTab(ComplianceTab.DELETE_PORTAL) }
+                    onOpen = { openExternalUrl(context, deleteDataUrl) }
                 )
             }
         }
@@ -375,7 +360,7 @@ fun ComplianceUrlItemRow(
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.OpenInNew,
-                        contentDescription = "View $label",
+                        contentDescription = "Open $label",
                         modifier = Modifier.size(16.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -407,7 +392,7 @@ fun LegalAndComplianceDialog(
         title = {
             Column {
                 Text(
-                    text = "Legal, Privacy & GitHub Data Safety URLs",
+                    text = "Legal, Privacy & Data Safety Center",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
@@ -452,25 +437,14 @@ fun LegalAndComplianceDialog(
                 when (selectedTab) {
                     ComplianceTab.PRIVACY -> {
                         ComplianceUrlBox(
-                            title = "GitHub Pages Privacy Policy URL",
-                            url = BasketBrainComplianceUrls.githubPagesPrivacyUrl(),
+                            title = "Live Active Privacy Policy URL (Verified HTTP 200)",
+                            url = BasketBrainComplianceUrls.LIVE_PRIVACY_POLICY_URL,
                             onCopy = {
-                                copyUrlToClipboard(context, "GitHub Pages Privacy URL", BasketBrainComplianceUrls.githubPagesPrivacyUrl())
-                                copiedNotice = "GitHub Pages Privacy Policy URL copied."
+                                copyUrlToClipboard(context, "Privacy Policy URL", BasketBrainComplianceUrls.LIVE_PRIVACY_POLICY_URL)
+                                copiedNotice = "Live Privacy Policy URL copied to clipboard."
                             },
                             onOpenBrowser = {
-                                openExternalUrl(context, BasketBrainComplianceUrls.githubPagesPrivacyUrl())
-                            }
-                        )
-                        ComplianceUrlBox(
-                            title = "GitHub Repo Privacy Policy Markdown URL",
-                            url = BasketBrainComplianceUrls.githubRepoPrivacyUrl(),
-                            onCopy = {
-                                copyUrlToClipboard(context, "GitHub Repo Privacy URL", BasketBrainComplianceUrls.githubRepoPrivacyUrl())
-                                copiedNotice = "GitHub Repo Privacy Policy URL copied."
-                            },
-                            onOpenBrowser = {
-                                openExternalUrl(context, BasketBrainComplianceUrls.githubRepoPrivacyUrl())
+                                openExternalUrl(context, BasketBrainComplianceUrls.LIVE_PRIVACY_POLICY_URL)
                             }
                         )
                         Text(
@@ -491,25 +465,14 @@ fun LegalAndComplianceDialog(
 
                     ComplianceTab.TERMS -> {
                         ComplianceUrlBox(
-                            title = "GitHub Pages Terms of Service URL",
-                            url = BasketBrainComplianceUrls.githubPagesTermsUrl(),
+                            title = "Live Active Terms of Service URL (Verified HTTP 200)",
+                            url = BasketBrainComplianceUrls.LIVE_TERMS_OF_SERVICE_URL,
                             onCopy = {
-                                copyUrlToClipboard(context, "GitHub Pages Terms URL", BasketBrainComplianceUrls.githubPagesTermsUrl())
-                                copiedNotice = "GitHub Pages Terms of Service URL copied."
+                                copyUrlToClipboard(context, "Terms of Service URL", BasketBrainComplianceUrls.LIVE_TERMS_OF_SERVICE_URL)
+                                copiedNotice = "Live Terms of Service URL copied to clipboard."
                             },
                             onOpenBrowser = {
-                                openExternalUrl(context, BasketBrainComplianceUrls.githubPagesTermsUrl())
-                            }
-                        )
-                        ComplianceUrlBox(
-                            title = "GitHub Repo Terms of Service Markdown URL",
-                            url = BasketBrainComplianceUrls.githubRepoTermsUrl(),
-                            onCopy = {
-                                copyUrlToClipboard(context, "GitHub Repo Terms URL", BasketBrainComplianceUrls.githubRepoTermsUrl())
-                                copiedNotice = "GitHub Repo Terms of Service URL copied."
-                            },
-                            onOpenBrowser = {
-                                openExternalUrl(context, BasketBrainComplianceUrls.githubRepoTermsUrl())
+                                openExternalUrl(context, BasketBrainComplianceUrls.LIVE_TERMS_OF_SERVICE_URL)
                             }
                         )
                         Text(
@@ -529,50 +492,26 @@ fun LegalAndComplianceDialog(
 
                     ComplianceTab.DELETE_PORTAL -> {
                         ComplianceUrlBox(
-                            title = "Delete Account Form URL (GitHub Pages)",
-                            url = BasketBrainComplianceUrls.githubPagesDeleteAccountUrl(),
+                            title = "Live Delete Account URL (Verified HTTP 200)",
+                            url = BasketBrainComplianceUrls.LIVE_DELETE_ACCOUNT_URL,
                             onCopy = {
-                                copyUrlToClipboard(context, "Delete Account URL", BasketBrainComplianceUrls.githubPagesDeleteAccountUrl())
-                                copiedNotice = "GitHub Pages Delete Account URL copied."
+                                copyUrlToClipboard(context, "Delete Account URL", BasketBrainComplianceUrls.LIVE_DELETE_ACCOUNT_URL)
+                                copiedNotice = "Live Delete Account URL copied to clipboard."
                             },
                             onOpenBrowser = {
-                                openExternalUrl(context, BasketBrainComplianceUrls.githubPagesDeleteAccountUrl())
+                                openExternalUrl(context, BasketBrainComplianceUrls.LIVE_DELETE_ACCOUNT_URL)
                             }
                         )
 
                         ComplianceUrlBox(
-                            title = "Delete Data Only Form URL (GitHub Pages)",
-                            url = BasketBrainComplianceUrls.githubPagesDeleteDataUrl(),
+                            title = "Live Delete Data Only URL (Verified HTTP 200)",
+                            url = BasketBrainComplianceUrls.LIVE_DELETE_DATA_URL,
                             onCopy = {
-                                copyUrlToClipboard(context, "Delete Data URL", BasketBrainComplianceUrls.githubPagesDeleteDataUrl())
-                                copiedNotice = "GitHub Pages Delete Data URL copied."
+                                copyUrlToClipboard(context, "Delete Data URL", BasketBrainComplianceUrls.LIVE_DELETE_DATA_URL)
+                                copiedNotice = "Live Delete Data URL copied to clipboard."
                             },
                             onOpenBrowser = {
-                                openExternalUrl(context, BasketBrainComplianceUrls.githubPagesDeleteDataUrl())
-                            }
-                        )
-
-                        ComplianceUrlBox(
-                            title = "Delete Account URL (GitHub Repo Markdown)",
-                            url = BasketBrainComplianceUrls.githubRepoDeleteAccountUrl(),
-                            onCopy = {
-                                copyUrlToClipboard(context, "GitHub Repo Delete Account URL", BasketBrainComplianceUrls.githubRepoDeleteAccountUrl())
-                                copiedNotice = "GitHub Repo Delete Account URL copied."
-                            },
-                            onOpenBrowser = {
-                                openExternalUrl(context, BasketBrainComplianceUrls.githubRepoDeleteAccountUrl())
-                            }
-                        )
-
-                        ComplianceUrlBox(
-                            title = "Delete Data Only URL (GitHub Repo Markdown)",
-                            url = BasketBrainComplianceUrls.githubRepoDeleteDataUrl(),
-                            onCopy = {
-                                copyUrlToClipboard(context, "GitHub Repo Delete Data URL", BasketBrainComplianceUrls.githubRepoDeleteDataUrl())
-                                copiedNotice = "GitHub Repo Delete Data URL copied."
-                            },
-                            onOpenBrowser = {
-                                openExternalUrl(context, BasketBrainComplianceUrls.githubRepoDeleteDataUrl())
+                                openExternalUrl(context, BasketBrainComplianceUrls.LIVE_DELETE_DATA_URL)
                             }
                         )
 
