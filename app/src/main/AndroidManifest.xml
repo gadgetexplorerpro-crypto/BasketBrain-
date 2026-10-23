@@ -33,6 +33,22 @@
 
                 <data
                     android:scheme="https"
+                    android:host="gadgetexplorerpro.github.io"
+                    android:pathPrefix="/basketbrain/privacy-policy" />
+                <data
+                    android:scheme="https"
+                    android:host="gadgetexplorerpro.github.io"
+                    android:pathPrefix="/basketbrain/terms-of-service" />
+                <data
+                    android:scheme="https"
+                    android:host="gadgetexplorerpro.github.io"
+                    android:pathPrefix="/basketbrain/delete-account" />
+                <data
+                    android:scheme="https"
+                    android:host="gadgetexplorerpro.github.io"
+                    android:pathPrefix="/basketbrain/delete-data" />
+                <data
+                    android:scheme="https"
                     android:host="ais-pre-q6q6qjdjtx7edesdpxcs76-861509315491.asia-east1.run.app"
                     android:pathPrefix="/privacy-policy" />
                 <data

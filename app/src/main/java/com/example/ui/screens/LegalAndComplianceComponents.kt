@@ -60,11 +60,39 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 object BasketBrainComplianceUrls {
-    const val BASE_WEB_URL = "https://ais-pre-q6q6qjdjtx7edesdpxcs76-861509315491.asia-east1.run.app"
-    const val PRIVACY_POLICY_URL = "$BASE_WEB_URL/privacy-policy"
-    const val TERMS_OF_SERVICE_URL = "$BASE_WEB_URL/terms-of-service"
-    const val DELETE_ACCOUNT_URL = "$BASE_WEB_URL/delete-account"
-    const val DELETE_DATA_URL = "$BASE_WEB_URL/delete-data"
+    const val DEFAULT_GITHUB_USER = "gadgetexplorerpro"
+    const val DEFAULT_GITHUB_REPO = "basketbrain"
+
+    // GitHub Pages Interactive HTML Form URLs (from /docs/*.html in repo)
+    fun githubPagesPrivacyUrl(user: String = DEFAULT_GITHUB_USER, repo: String = DEFAULT_GITHUB_REPO): String =
+        "https://${user.trim()}.github.io/${repo.trim()}/privacy-policy.html"
+
+    fun githubPagesTermsUrl(user: String = DEFAULT_GITHUB_USER, repo: String = DEFAULT_GITHUB_REPO): String =
+        "https://${user.trim()}.github.io/${repo.trim()}/terms-of-service.html"
+
+    fun githubPagesDeleteAccountUrl(user: String = DEFAULT_GITHUB_USER, repo: String = DEFAULT_GITHUB_REPO): String =
+        "https://${user.trim()}.github.io/${repo.trim()}/delete-account.html"
+
+    fun githubPagesDeleteDataUrl(user: String = DEFAULT_GITHUB_USER, repo: String = DEFAULT_GITHUB_REPO): String =
+        "https://${user.trim()}.github.io/${repo.trim()}/delete-data.html"
+
+    // Direct GitHub Repository Markdown URLs (from /docs/*.md in repo — works immediately without GitHub Pages setup)
+    fun githubRepoPrivacyUrl(user: String = DEFAULT_GITHUB_USER, repo: String = DEFAULT_GITHUB_REPO): String =
+        "https://github.com/${user.trim()}/${repo.trim()}/blob/main/docs/PRIVACY_POLICY.md"
+
+    fun githubRepoTermsUrl(user: String = DEFAULT_GITHUB_USER, repo: String = DEFAULT_GITHUB_REPO): String =
+        "https://github.com/${user.trim()}/${repo.trim()}/blob/main/docs/TERMS_OF_SERVICE.md"
+
+    fun githubRepoDeleteAccountUrl(user: String = DEFAULT_GITHUB_USER, repo: String = DEFAULT_GITHUB_REPO): String =
+        "https://github.com/${user.trim()}/${repo.trim()}/blob/main/docs/DELETE_ACCOUNT.md"
+
+    fun githubRepoDeleteDataUrl(user: String = DEFAULT_GITHUB_USER, repo: String = DEFAULT_GITHUB_REPO): String =
+        "https://github.com/${user.trim()}/${repo.trim()}/blob/main/docs/DELETE_DATA.md"
+
+    val PRIVACY_POLICY_URL: String = githubPagesPrivacyUrl()
+    val TERMS_OF_SERVICE_URL: String = githubPagesTermsUrl()
+    val DELETE_ACCOUNT_URL: String = githubPagesDeleteAccountUrl()
+    val DELETE_DATA_URL: String = githubPagesDeleteDataUrl()
     const val SUPPORT_EMAIL = "privacy@basketbrain.app"
 }
 
@@ -82,6 +110,31 @@ fun LoginLegalAndDataFooter(
 ) {
     val context = LocalContext.current
     var copiedLabel by remember { mutableStateOf<String?>(null) }
+    var useGithubPagesFormat by remember { mutableStateOf(true) }
+    var githubUser by remember { mutableStateOf(BasketBrainComplianceUrls.DEFAULT_GITHUB_USER) }
+    var githubRepo by remember { mutableStateOf(BasketBrainComplianceUrls.DEFAULT_GITHUB_REPO) }
+    var showCustomizeGithub by remember { mutableStateOf(false) }
+
+    val privacyUrl = if (useGithubPagesFormat) {
+        BasketBrainComplianceUrls.githubPagesPrivacyUrl(githubUser, githubRepo)
+    } else {
+        BasketBrainComplianceUrls.githubRepoPrivacyUrl(githubUser, githubRepo)
+    }
+    val termsUrl = if (useGithubPagesFormat) {
+        BasketBrainComplianceUrls.githubPagesTermsUrl(githubUser, githubRepo)
+    } else {
+        BasketBrainComplianceUrls.githubRepoTermsUrl(githubUser, githubRepo)
+    }
+    val deleteAccountUrl = if (useGithubPagesFormat) {
+        BasketBrainComplianceUrls.githubPagesDeleteAccountUrl(githubUser, githubRepo)
+    } else {
+        BasketBrainComplianceUrls.githubRepoDeleteAccountUrl(githubUser, githubRepo)
+    }
+    val deleteDataUrl = if (useGithubPagesFormat) {
+        BasketBrainComplianceUrls.githubPagesDeleteDataUrl(githubUser, githubRepo)
+    } else {
+        BasketBrainComplianceUrls.githubRepoDeleteDataUrl(githubUser, githubRepo)
+    }
 
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -169,57 +222,99 @@ fun LoginLegalAndDataFooter(
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "Compliance & Data Safety URLs",
+                            text = "GitHub Legal & Data Safety URLs",
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                     }
-                    copiedLabel?.let { label ->
+                    TextButton(onClick = { showCustomizeGithub = !showCustomizeGithub }) {
                         Text(
-                            text = "Copied $label!",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Bold
+                            text = if (showCustomizeGithub) "Hide Repo Config" else "Edit GitHub Repo",
+                            style = MaterialTheme.typography.labelSmall
                         )
                     }
                 }
 
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FilterChip(
+                        selected = useGithubPagesFormat,
+                        onClick = { useGithubPagesFormat = true },
+                        label = { Text("GitHub Pages (.github.io)", style = MaterialTheme.typography.labelSmall) }
+                    )
+                    FilterChip(
+                        selected = !useGithubPagesFormat,
+                        onClick = { useGithubPagesFormat = false },
+                        label = { Text("GitHub Repo (/docs/*.md)", style = MaterialTheme.typography.labelSmall) }
+                    )
+                }
+
+                if (showCustomizeGithub) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        OutlinedTextField(
+                            value = githubUser,
+                            onValueChange = { githubUser = it },
+                            label = { Text("GitHub User") },
+                            singleLine = true,
+                            modifier = Modifier.weight(1f)
+                        )
+                        OutlinedTextField(
+                            value = githubRepo,
+                            onValueChange = { githubRepo = it },
+                            label = { Text("Repo Name") },
+                            singleLine = true,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+
+                copiedLabel?.let { label ->
+                    Text(
+                        text = "Copied $label to clipboard!",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
                 ComplianceUrlItemRow(
-                    label = "Privacy Policy URL",
-                    url = BasketBrainComplianceUrls.PRIVACY_POLICY_URL,
+                    label = "Privacy Policy URL (GitHub)",
+                    url = privacyUrl,
                     onCopy = {
-                        copyUrlToClipboard(context, "Privacy Policy URL", BasketBrainComplianceUrls.PRIVACY_POLICY_URL)
+                        copyUrlToClipboard(context, "Privacy Policy URL", privacyUrl)
                         copiedLabel = "Privacy URL"
                     },
                     onOpen = { onOpenTab(ComplianceTab.PRIVACY) }
                 )
 
                 ComplianceUrlItemRow(
-                    label = "Terms of Service URL",
-                    url = BasketBrainComplianceUrls.TERMS_OF_SERVICE_URL,
+                    label = "Terms of Service URL (GitHub)",
+                    url = termsUrl,
                     onCopy = {
-                        copyUrlToClipboard(context, "Terms of Service URL", BasketBrainComplianceUrls.TERMS_OF_SERVICE_URL)
+                        copyUrlToClipboard(context, "Terms of Service URL", termsUrl)
                         copiedLabel = "Terms URL"
                     },
                     onOpen = { onOpenTab(ComplianceTab.TERMS) }
                 )
 
                 ComplianceUrlItemRow(
-                    label = "Delete Account URL",
-                    url = BasketBrainComplianceUrls.DELETE_ACCOUNT_URL,
+                    label = "Delete Account Form URL (GitHub)",
+                    url = deleteAccountUrl,
                     onCopy = {
-                        copyUrlToClipboard(context, "Delete Account URL", BasketBrainComplianceUrls.DELETE_ACCOUNT_URL)
+                        copyUrlToClipboard(context, "Delete Account URL", deleteAccountUrl)
                         copiedLabel = "Delete Account URL"
                     },
                     onOpen = { onOpenTab(ComplianceTab.DELETE_PORTAL) }
                 )
 
                 ComplianceUrlItemRow(
-                    label = "Delete Data URL",
-                    url = BasketBrainComplianceUrls.DELETE_DATA_URL,
+                    label = "Delete Data Form URL (GitHub)",
+                    url = deleteDataUrl,
                     onCopy = {
-                        copyUrlToClipboard(context, "Delete Data URL", BasketBrainComplianceUrls.DELETE_DATA_URL)
+                        copyUrlToClipboard(context, "Delete Data URL", deleteDataUrl)
                         copiedLabel = "Delete Data URL"
                     },
                     onOpen = { onOpenTab(ComplianceTab.DELETE_PORTAL) }
@@ -312,7 +407,7 @@ fun LegalAndComplianceDialog(
         title = {
             Column {
                 Text(
-                    text = "Legal, Privacy & Data Safety Center",
+                    text = "Legal, Privacy & GitHub Data Safety URLs",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
@@ -357,18 +452,29 @@ fun LegalAndComplianceDialog(
                 when (selectedTab) {
                     ComplianceTab.PRIVACY -> {
                         ComplianceUrlBox(
-                            title = "Official Privacy Policy URL",
-                            url = BasketBrainComplianceUrls.PRIVACY_POLICY_URL,
+                            title = "GitHub Pages Privacy Policy URL",
+                            url = BasketBrainComplianceUrls.githubPagesPrivacyUrl(),
                             onCopy = {
-                                copyUrlToClipboard(context, "Privacy Policy URL", BasketBrainComplianceUrls.PRIVACY_POLICY_URL)
-                                copiedNotice = "Privacy Policy URL copied to clipboard."
+                                copyUrlToClipboard(context, "GitHub Pages Privacy URL", BasketBrainComplianceUrls.githubPagesPrivacyUrl())
+                                copiedNotice = "GitHub Pages Privacy Policy URL copied."
                             },
                             onOpenBrowser = {
-                                openExternalUrl(context, BasketBrainComplianceUrls.PRIVACY_POLICY_URL)
+                                openExternalUrl(context, BasketBrainComplianceUrls.githubPagesPrivacyUrl())
+                            }
+                        )
+                        ComplianceUrlBox(
+                            title = "GitHub Repo Privacy Policy Markdown URL",
+                            url = BasketBrainComplianceUrls.githubRepoPrivacyUrl(),
+                            onCopy = {
+                                copyUrlToClipboard(context, "GitHub Repo Privacy URL", BasketBrainComplianceUrls.githubRepoPrivacyUrl())
+                                copiedNotice = "GitHub Repo Privacy Policy URL copied."
+                            },
+                            onOpenBrowser = {
+                                openExternalUrl(context, BasketBrainComplianceUrls.githubRepoPrivacyUrl())
                             }
                         )
                         Text(
-                            text = "Effective Date: October 2026\n\n" +
+                            text = "Effective Date: October 23, 2026\n\n" +
                                 "1. Information We Collect\n" +
                                 "• Account Identity: When you sign in with Google via Jetpack Credential Manager and Firebase Authentication, we receive your unique Firebase User ID (UID) and display name.\n" +
                                 "• Household & Budget Data: Weekly/monthly grocery budget targets, household size, dietary preferences, digital pantry items, meal plans, shopping lists, and logged purchase receipts.\n\n" +
@@ -385,18 +491,29 @@ fun LegalAndComplianceDialog(
 
                     ComplianceTab.TERMS -> {
                         ComplianceUrlBox(
-                            title = "Official Terms of Service URL",
-                            url = BasketBrainComplianceUrls.TERMS_OF_SERVICE_URL,
+                            title = "GitHub Pages Terms of Service URL",
+                            url = BasketBrainComplianceUrls.githubPagesTermsUrl(),
                             onCopy = {
-                                copyUrlToClipboard(context, "Terms of Service URL", BasketBrainComplianceUrls.TERMS_OF_SERVICE_URL)
-                                copiedNotice = "Terms of Service URL copied to clipboard."
+                                copyUrlToClipboard(context, "GitHub Pages Terms URL", BasketBrainComplianceUrls.githubPagesTermsUrl())
+                                copiedNotice = "GitHub Pages Terms of Service URL copied."
                             },
                             onOpenBrowser = {
-                                openExternalUrl(context, BasketBrainComplianceUrls.TERMS_OF_SERVICE_URL)
+                                openExternalUrl(context, BasketBrainComplianceUrls.githubPagesTermsUrl())
+                            }
+                        )
+                        ComplianceUrlBox(
+                            title = "GitHub Repo Terms of Service Markdown URL",
+                            url = BasketBrainComplianceUrls.githubRepoTermsUrl(),
+                            onCopy = {
+                                copyUrlToClipboard(context, "GitHub Repo Terms URL", BasketBrainComplianceUrls.githubRepoTermsUrl())
+                                copiedNotice = "GitHub Repo Terms of Service URL copied."
+                            },
+                            onOpenBrowser = {
+                                openExternalUrl(context, BasketBrainComplianceUrls.githubRepoTermsUrl())
                             }
                         )
                         Text(
-                            text = "Last Updated: October 2026\n\n" +
+                            text = "Last Updated: October 23, 2026\n\n" +
                                 "1. Service Scope\n" +
                                 "BasketBrain is a grocery budgeting, meal planning, and pantry management tool designed to help households plan affordable meals and reduce food waste.\n\n" +
                                 "2. Grocery Price Estimates Disclaimer\n" +
@@ -412,26 +529,50 @@ fun LegalAndComplianceDialog(
 
                     ComplianceTab.DELETE_PORTAL -> {
                         ComplianceUrlBox(
-                            title = "Delete Account URL (Play Console Data Safety)",
-                            url = BasketBrainComplianceUrls.DELETE_ACCOUNT_URL,
+                            title = "Delete Account Form URL (GitHub Pages)",
+                            url = BasketBrainComplianceUrls.githubPagesDeleteAccountUrl(),
                             onCopy = {
-                                copyUrlToClipboard(context, "Delete Account URL", BasketBrainComplianceUrls.DELETE_ACCOUNT_URL)
-                                copiedNotice = "Delete Account URL copied to clipboard."
+                                copyUrlToClipboard(context, "Delete Account URL", BasketBrainComplianceUrls.githubPagesDeleteAccountUrl())
+                                copiedNotice = "GitHub Pages Delete Account URL copied."
                             },
                             onOpenBrowser = {
-                                openExternalUrl(context, BasketBrainComplianceUrls.DELETE_ACCOUNT_URL)
+                                openExternalUrl(context, BasketBrainComplianceUrls.githubPagesDeleteAccountUrl())
                             }
                         )
 
                         ComplianceUrlBox(
-                            title = "Delete Data Only URL (Play Console Data Safety)",
-                            url = BasketBrainComplianceUrls.DELETE_DATA_URL,
+                            title = "Delete Data Only Form URL (GitHub Pages)",
+                            url = BasketBrainComplianceUrls.githubPagesDeleteDataUrl(),
                             onCopy = {
-                                copyUrlToClipboard(context, "Delete Data URL", BasketBrainComplianceUrls.DELETE_DATA_URL)
-                                copiedNotice = "Delete Data URL copied to clipboard."
+                                copyUrlToClipboard(context, "Delete Data URL", BasketBrainComplianceUrls.githubPagesDeleteDataUrl())
+                                copiedNotice = "GitHub Pages Delete Data URL copied."
                             },
                             onOpenBrowser = {
-                                openExternalUrl(context, BasketBrainComplianceUrls.DELETE_DATA_URL)
+                                openExternalUrl(context, BasketBrainComplianceUrls.githubPagesDeleteDataUrl())
+                            }
+                        )
+
+                        ComplianceUrlBox(
+                            title = "Delete Account URL (GitHub Repo Markdown)",
+                            url = BasketBrainComplianceUrls.githubRepoDeleteAccountUrl(),
+                            onCopy = {
+                                copyUrlToClipboard(context, "GitHub Repo Delete Account URL", BasketBrainComplianceUrls.githubRepoDeleteAccountUrl())
+                                copiedNotice = "GitHub Repo Delete Account URL copied."
+                            },
+                            onOpenBrowser = {
+                                openExternalUrl(context, BasketBrainComplianceUrls.githubRepoDeleteAccountUrl())
+                            }
+                        )
+
+                        ComplianceUrlBox(
+                            title = "Delete Data Only URL (GitHub Repo Markdown)",
+                            url = BasketBrainComplianceUrls.githubRepoDeleteDataUrl(),
+                            onCopy = {
+                                copyUrlToClipboard(context, "GitHub Repo Delete Data URL", BasketBrainComplianceUrls.githubRepoDeleteDataUrl())
+                                copiedNotice = "GitHub Repo Delete Data URL copied."
+                            },
+                            onOpenBrowser = {
+                                openExternalUrl(context, BasketBrainComplianceUrls.githubRepoDeleteDataUrl())
                             }
                         )
 
@@ -483,7 +624,7 @@ fun LegalAndComplianceDialog(
                         }
 
                         Text(
-                            text = "Web / Unauthenticated Deletion Request",
+                            text = "Unauthenticated Deletion Request Form",
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold
                         )

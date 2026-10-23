@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BasketBrain — Privacy Policy</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #F8FAF6; color: #12211B; max-width: 760px; margin: 0 auto; padding: 32px 20px; line-height: 1.6; }
+    .card { background: #FFFFFF; border-radius: 16px; padding: 28px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+    h1 { color: #174C3C; margin-top: 0; }
+    h2 { color: #174C3C; margin-top: 24px; font-size: 1.15rem; }
+    .badge { display: inline-block; background: #D4EDDA; color: #0B3024; padding: 4px 12px; border-radius: 999px; font-size: 0.85rem; font-weight: 600; margin-bottom: 12px; }
+    a { color: #174C3C; font-weight: 600; }
+    .nav { margin-top: 24px; padding-top: 16px; border-top: 1px solid #E2EAE5; display: flex; gap: 16px; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <span class="badge">BasketBrain Official Legal Document</span>
+    <h1>Privacy Policy</h1>
+    <p><strong>Effective Date:</strong> October 23, 2026<br/>
+    <strong>Application:</strong> BasketBrain — Smart Grocery Budget &amp; Meal Planner (<code>com.aistudio.basketbrain.kxmprz</code>)</p>
+
+    <h2>1. Information We Collect</h2>
+    <ul>
+      <li><strong>Account Identity:</strong> When you sign in with Google via Android Credential Manager and Firebase Authentication, we store your Firebase User ID (UID) and display name to isolate and sync your household data.</li>
+      <li><strong>Household &amp; Grocery Data:</strong> Weekly/monthly grocery budgets, household member profiles, dietary preferences, allergies, digital pantry items, planned meals, shopping lists, and logged purchase records.</li>
+      <li><strong>Receipt Images:</strong> When you use the Receipt Scanner, receipt images are processed securely via Firebase AI Logic to extract line items and totals.</li>
+    </ul>
+
+    <h2>2. How We Use &amp; Protect Your Data</h2>
+    <ul>
+      <li><strong>Strict UID Isolation:</strong> All user records are stored in Google Cloud Firestore under <code>/users/{userId}</code> and protected by zero-trust Firestore security rules so only your authenticated Google account can access your records.</li>
+      <li><strong>Enterprise AI Security:</strong> AI meal planning and receipt OCR run through Firebase AI Logic attested by Firebase App Check. No raw Gemini API keys are embedded in the Android APK.</li>
+      <li><strong>No Data Selling:</strong> BasketBrain does not sell, rent, or share your personal or household data with advertisers or data brokers.</li>
+    </ul>
+
+    <h2>3. Data Retention, Export &amp; Deletion</h2>
+    <p>You may export your household data as JSON, delete your cloud data while keeping your account active, or permanently delete your account and all associated data at any time inside the app (<strong>Profile → Data &amp; Account Management</strong>) or via our online deletion forms below:</p>
+    <ul>
+      <li><a href="./delete-account.html">Request Full Account &amp; Data Deletion</a></li>
+      <li><a href="./delete-data.html">Request Cloud Data-Only Deletion (Keep Account)</a></li>
+    </ul>
+
+    <h2>4. Contact Us</h2>
+    <p>For privacy inquiries or data requests, contact <a href="mailto:privacy@basketbrain.app">privacy@basketbrain.app</a>.</p>
+
+    <div class="nav">
+      <a href="./terms-of-service.html">Terms of Service</a>
+      <a href="./delete-account.html">Delete Account Form</a>
+      <a href="./delete-data.html">Delete Data Form</a>
+    </div>
+  </div>
+</body>
+</html>

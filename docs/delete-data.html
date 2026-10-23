@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BasketBrain — Delete Cloud Data Only Form</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #F8FAF6; color: #12211B; max-width: 720px; margin: 0 auto; padding: 32px 20px; line-height: 1.6; }
+    .card { background: #FFFFFF; border-radius: 16px; padding: 28px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+    h1 { color: #174C3C; margin-top: 0; }
+    h2 { color: #174C3C; margin-top: 22px; font-size: 1.1rem; }
+    .badge { display: inline-block; background: #FFE0B2; color: #3A2200; padding: 4px 12px; border-radius: 999px; font-size: 0.85rem; font-weight: 600; margin-bottom: 12px; }
+    label { display: block; font-weight: 600; margin-top: 14px; margin-bottom: 6px; }
+    input, select, textarea { width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid #C4D1C9; border-radius: 10px; font-size: 0.95rem; }
+    button { margin-top: 18px; width: 100%; background: #174C3C; color: #FFFFFF; border: none; padding: 12px 18px; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; }
+    .success { display: none; margin-top: 16px; padding: 14px; border-radius: 10px; background: #D4EDDA; color: #0B3024; font-weight: 500; }
+    .nav { margin-top: 24px; padding-top: 16px; border-top: 1px solid #E2EAE5; display: flex; gap: 16px; flex-wrap: wrap; }
+    a { color: #174C3C; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <span class="badge">Google Play Data Safety — Partial / Data-Only Deletion</span>
+    <h1>Delete Your BasketBrain Cloud Data (Keep Account Active)</h1>
+    <p><strong>Application:</strong> BasketBrain (<code>com.aistudio.basketbrain.kxmprz</code>)</p>
+
+    <h2>Option 1: Instant In-App Data Deletion</h2>
+    <ol>
+      <li>Open the <strong>BasketBrain</strong> Android app.</li>
+      <li>Navigate to <strong>Profile</strong> &rarr; <strong>Data &amp; Account Management</strong>.</li>
+      <li>Tap <strong>Delete Cloud Data Only (Keep Account)</strong>. All meal plans, pantry items, grocery lists, and purchases are erased while your login remains active.</li>
+    </ol>
+
+    <h2>Option 2: Web Data-Only Deletion Request Form</h2>
+    <p>Submit the form below to delete selected or all cloud data associated with your account without deleting your Google sign-in profile:</p>
+
+    <form id="deleteDataForm" onsubmit="submitDataRequest(event)">
+      <label for="email">Google Account Email Address *</label>
+      <input type="email" id="email" required placeholder="you@gmail.com" />
+
+      <label for="dataCategory">Data to Delete</label>
+      <select id="dataCategory">
+        <option value="ALL_CLOUD_DATA_KEEP_ACCOUNT" selected>All Cloud Data (Meal Plans, Pantry, Groceries, Purchases)</option>
+        <option value="PURCHASE_AND_RECEIPT_HISTORY">Purchase &amp; Receipt History Only</option>
+        <option value="PANTRY_AND_MEAL_PLANS">Pantry Inventory &amp; Meal Plans Only</option>
+      </select>
+
+      <label for="notes">Additional Instructions (Optional)</label>
+      <textarea id="notes" rows="3" placeholder="Any specific data records you want removed..."></textarea>
+
+      <button type="submit">Submit Data Deletion Request</button>
+    </form>
+
+    <div id="confirmationBox" class="success">
+      Your data deletion request has been prepared. Your email client will open to send the request to <strong>privacy@basketbrain.app</strong>.
+    </div>
+
+    <div class="nav">
+      <a href="./delete-account.html">Delete Full Account Form</a>
+      <a href="./privacy-policy.html">Privacy Policy</a>
+      <a href="./terms-of-service.html">Terms of Service</a>
+    </div>
+  </div>
+
+  <script>
+    function submitDataRequest(e) {
+      e.preventDefault();
+      var email = document.getElementById('email').value;
+      var category = document.getElementById('dataCategory').value;
+      var notes = document.getElementById('notes').value;
+      document.getElementById('confirmationBox').style.display = 'block';
+      var subject = encodeURIComponent('BasketBrain Data-Only Deletion Request (' + category + ')');
+      var body = encodeURIComponent('Account Email: ' + email + '\nData Scope: ' + category + '\nNotes: ' + notes);
+      window.location.href = 'mailto:privacy@basketbrain.app?subject=' + subject + '&body=' + body;
+    }
+  </script>
+</body>
+</html>
